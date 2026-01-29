@@ -1,0 +1,34 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/wabot-menu", methods=["POST"])
+def wabot_menu():
+    data = request.json
+    sender = data.get("from")  # top-level key
+    msg = data.get("message", "").strip()  # top-level key
+    contact_name = data.get("contact", {}).get("name", "")  # child key
+
+    # Decide reply
+    if msg == "1":
+        reply = f"Hi {contact_name}, Book your session here: https://yourbookinglink.com"
+    elif msg == "2":
+        reply = f"Hi {contact_name}, View our pricing here: https://yourpricinglink.com"
+    elif msg == "3":
+        reply = f"Hi {contact_name}, Talk to our customer service: +6012xxxxxxx"
+    elif msg == "4":
+        reply = f"Hi {contact_name}, See our FAQs here: https://yourfaqlink.com"
+    else:
+        reply = ("Hi 👋 Welcome to BC! How can we help you today? Reply with the number below 👇\n"
+                 "1️⃣ Book a session with us\n"
+                 "2️⃣ View pricing\n"
+                 "3️⃣ Talk to customer service\n"
+                 "4️⃣ FAQs")
+
+    return jsonify({
+        "phone": sender,
+        "message": reply
+    })
+
+if __name__ == "__main__":
+    app.run(port=5000)
