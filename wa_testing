@@ -5,11 +5,10 @@ app = Flask(__name__)
 @app.route("/wabot-menu", methods=["POST"])
 def wabot_menu():
     data = request.json
-    sender = data.get("from")  # top-level key
-    msg = data.get("message", "").strip()  # top-level key
-    contact_name = data.get("contact", {}).get("name", "")  # child key
+    sender = data.get("from")
+    msg = data.get("message", "").strip()
+    contact_name = data.get("contact", {}).get("name", "")
 
-    # Decide reply
     if msg == "1":
         reply = f"Hi {contact_name}, Book your session here: https://yourbookinglink.com"
     elif msg == "2":
@@ -19,7 +18,7 @@ def wabot_menu():
     elif msg == "4":
         reply = f"Hi {contact_name}, See our FAQs here: https://yourfaqlink.com"
     else:
-        reply = ("Hi 👋 Welcome to BC! How can we help you today? Reply with the number below 👇\n"
+        reply = ("Hi 👋 Welcome to BC! Reply with the number below 👇\n"
                  "1️⃣ Book a session with us\n"
                  "2️⃣ View pricing\n"
                  "3️⃣ Talk to customer service\n"
@@ -31,4 +30,4 @@ def wabot_menu():
     })
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(host="0.0.0.0", port=5000)
