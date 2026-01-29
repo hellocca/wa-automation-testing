@@ -2,32 +2,45 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route("/wabot-menu", methods=["POST"])
-def wabot_menu():
-    data = request.json
-    sender = data.get("from")
-    msg = data.get("message", "").strip()
-    contact_name = data.get("contact", {}).get("name", "")
-
-    if msg == "1":
-        reply = f"Hi {contact_name}, Book your session here: https://yourbookinglink.com"
-    elif msg == "2":
-        reply = f"Hi {contact_name}, View our pricing here: https://yourpricinglink.com"
-    elif msg == "3":
-        reply = f"Hi {contact_name}, Talk to our customer service: +6012xxxxxxx"
-    elif msg == "4":
-        reply = f"Hi {contact_name}, See our FAQs here: https://yourfaqlink.com"
+# Your menu reply logic
+def get_reply(message, contact_name=None):
+    message = message.strip()
+    if message == "1":
+        return f"Hi {contact_name or ''}, Book your session here: https://yourbookinglink.com"
+    elif message == "2":
+        return f"Hi {contact_name or ''}, View our pricing here: https://yourpricinglink.com"
+    elif message == "3":
+        return f"Hi {contact_name or ''}, Talk to our customer service: +6012xxxxxxx"
+    elif message == "4":
+        return f"Hi {contact_name or ''}, See our FAQs here: https://yourfaqlink.com"
     else:
-        reply = ("Hi 👋 Welcome to BC! Reply with the number below 👇\n"
-                 "1️⃣ Book a session with us\n"
-                 "2️⃣ View pricing\n"
-                 "3️⃣ Talk to customer service\n"
-                 "4️⃣ FAQs")
+        return ("Hi 👋 Welcome to BC! How can we help you today? Reply with the number below 👇\n"
+                "1️⃣ Book a session\n"
+                "2️⃣ View pricing\n"
+                "3️⃣ Talk to customer service\n"
+                "4️⃣ FAQs")
 
-    return jsonify({
-        "phone": sender,
-        "message": reply
-    })
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.json
+
+    # Extract top-level keys from Wabot payload
+    sender_phone = data.get("from")
+    user_message = data.get("message")
+    
+    # Optional: child key for personalization
+    contact_name = data.get("contact", {}).get("name")
+
+    # Determine reply
+    reply_message = get_reply(user_message, contact_name)
+
+    # Respond back to Wabot
+    response = {
+        "phone": sender_phone,
+        "message": reply_message
+    }
+
+    return jsonify(response), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
